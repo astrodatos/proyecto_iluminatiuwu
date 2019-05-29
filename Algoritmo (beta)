@@ -1,0 +1,40 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+!pip install astroquery #esto para instalar astroquery
+
+from astroquery.gaia import Gaia #importamos gaia, aunque... no estamos seguros si es que
+#debemos hacer una especie de data=Gaia.query_sql(datos que necesitamos)
+#puesto que gaia no es como SDSS :c
+
+from google.colab import drive
+drive.mount('/content/gdrive', force_remount=True) 
+
+#Con los simples comandos anteriores ya podemos acceder a todos los archivos que estén en nuestro drive
+from astropy.io import fits
+from astropy.wcs import WCS
+filename = ('/content/gdrive/My Drive/Taller de proyecto/[100] 1557965513315O-result.fits.gz') #basta con el nombre
+hdu_fits = fits.open(filename) #abre los fits, pueden abrirse comprimidos en gz
+hdu = fits.open(filename)[1] #abre los fits, pueden abrirse comprimidos en gz
+header = hdu.header
+wcs = WCS(header) #permite leer el header world coordinate system
+print (wcs)
+
+data = Gaia.query_sql("""SELECT TOP 100 
+                      p.ra, p.dec, p.phot_g_mean_mag, p.phot_bp_mean_mag, 
+                      p.phot_rp_mean_mag, p.bp_rp, p.bp_g, p.g_rp, p.lum_val
+                      s.teff_val
+                      
+                      FROM PhotoObjAll AS p JOIN specObjAll s ON s.bestobjid = p.objid
+                      
+                      WHERE p.mode = 1 AND s.sciencePrimary = 1 AND p.clean = 1 AND s.class != 'QSO'
+                      
+                      """)
+                     
+from sklearn.neural_network import MLPClassifier #por ahora usaremos estos algoritmos, pero desconocemos más o menos como procesar los datos,
+from sklearn.ensemble import RandomForestClassifier #pero haremos lo posible durante de la clase de este miércoles 29,  
+#from sklearn.gaussian_process import GaussianProcessClassifier #teniendo en mente que hay una presentación preliminar para el 12 de junio
